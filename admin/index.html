@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEARTBEAT · Runtime</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>HEARTBEAT</h2>
+    <div class="subtitle">Runtime · AI Residency</div>
+
+    <!-- 纯 CSS 四屏切换：radio 在前，屏幕在后，用 :checked ~ 选择 -->
+    <input type="radio" name="screen" id="tab-ctrl" checked>
+    <input type="radio" name="screen" id="tab-kemi">
+    <input type="radio" name="screen" id="tab-audit">
+    <input type="radio" name="screen" id="tab-browser">
+
+    <nav class="tabs">
+      <label for="tab-ctrl">开关</label>
+      <label for="tab-kemi">克咪</label>
+      <label for="tab-audit">审核</label>
+      <label for="tab-browser">浏览器</label>
+    </nav>
+
+    <div class="screens">
+      <!-- ==================== 屏 1：开关 ==================== -->
+      <section class="screen" id="s-ctrl">
+        <div class="status">
+          <p>Gateway <strong id="gw-uptime">…</strong></p>
+          <p>当前唤醒端 <strong id="wake-which">…</strong></p>
+        </div>
+
+        <div class="card card-main">
+          <h3>🎯 合并轮询 v2 <em class="badge">当前生效</em></h3>
+          <div class="row">
+            <span class="dot" id="v2-dot"></span>
+            <span class="stat" id="v2-status">加载中…</span>
+            <button class="btn-on" onclick="toggleV2('start')">开启</button>
+            <button class="btn-off" onclick="toggleV2('stop')">关闭</button>
+          </div>
+          <div class="hint">一个进程，AI 自行决定做什么。下面勾选它可以做哪些事。</div>
+
+          <div class="acts" id="v2-acts">
+            <!-- 活动勾选框由 JS 动态生成，加新活动时 HTML 不用改 -->
+          </div>
+          <div class="acts-foot">
+            <span class="hint" id="acts-hint">加载中…</span>
+            <button class="btn-apply" id="acts-apply" onclick="saveActivities()" disabled>保存并重启</button>
+          </div>
+        </div>
+
+        <!-- 注入开关卡片 -->
+        <div class="card card-inject">
+          <h3>💬 记忆注入开关</h3>
+          <div class="hint">关闭时照常生成摘要但不注入到对话上下文(用于调试测试)</div>
+          <div class="inject-switches" id="inject-switches">
+            <label class="switch-item">
+              <input type="checkbox" id="sw-wake" onchange="toggleInject('wake', this.checked)">
+              <span>轮询(游戏/论坛/推送)</span>
+            </label>
+            <label class="switch-item">
+              <input type="checkbox" id="sw-voice" onchange="toggleInject('voice', this.checked)">
+              <span>语音(单条+通话)</span>
+            </label>
+            <label class="switch-item">
+              <input type="checkbox" id="sw-wechat" onchange="toggleInject('wechat', this.checked)">
+              <span>微信(对话摘要)</span>
+            </label>
+          </div>
+        </div>
+
+<details class="fold">
+          <summary>v1 旧版（保留兜底，平时不用开）</summary>
+          <div class="fold-body">
+            <div class="warn" id="v1-warn">v1 和 v2 互斥。v2 正在跑时开 v1 会变成两个进程同时推送。</div>
+            <div class="card card-v1">
+              <h3>💓 主动唤醒</h3>
+              <div class="row">
+                <span class="stat" id="hb-status">加载中…</span>
+                <button class="btn-on" onclick="toggleV1('heartbeat-wakeup','start')">开启</button>
+                <button class="btn-off" onclick="toggleV1('heartbeat-wakeup','stop')">关闭</button>
+              </div>
+            </div>
+            <div class="card card-v1">
+              <h3>🎮 游戏轮询</h3>
+              <div class="row">
+                <span class="stat" id="game-status">加载中…</span>
+                <button class="btn-on" onclick="toggleV1('game-bot','start')">开启</button>
+                <button class="btn-off" onclick="toggleV1('game-bot','stop')">关闭</button>
+              </div>
+            </div>
+            <div class="card card-v1">
+              <h3>🎯 合并轮询 v1</h3>
+              <div class="row">
+                <span class="stat" id="cb1-status">加载中…</span>
+                <button class="btn-on" onclick="toggleV1('combined','start')">开启</button>
+                <button class="btn-off" onclick="toggleV1('combined','stop')">关闭</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="fold">
+          <summary>配置（API / 模型 / 决策 / 时段 / 天气）</summary>
+          <div class="fold-body">
+            <div class="presets-box">
+              <h3>预设方案</h3>
+              <div class="preset-list" id="presetList"></div>
+              <div class="add-preset">
+                <strong>保存当前配置为新预设</strong>
+                <input id="presetName" placeholder="预设名称，例如：DeepSeek / Claude">
+                <button onclick="savePreset()">保存为预设</button>
+              </div>
+            </div>
+
+            <div class="config-box">
+              <form id="configForm" onsubmit="saveConfig(event)">
+                <label>API URL</label>
+                <input name="target_url" id="f_url">
+                <label>API Key</label>
+                <input name="target_key" id="f_key" placeholder="留空不修改">
+                <label>Gateway API Key</label>
+                <input name="gateway_api_key" id="f_gateway_key" placeholder="公网 /v1 鉴权 key，留空不修改">
+                <div class="hint">当前状态：<span id="gw-key-status">…</span>。公开部署并开启 ALLOW_PUBLIC_API=true 时，Kelivo 的 API Key 请填写这个 Gateway API Key，不要填写上游 API Key。</div>
+                <label>Model Name</label>
+                <input name="model_name" id="f_model">
+                <label>Bark Key</label>
+                <input name="bark_key" id="f_bark" placeholder="留空不修改">
+                <label>Bark Icon URL</label>
+                <input name="custom_icon" id="f_icon" placeholder="可选">
+
+                <div class="section-title">Decision Engine</div>
+                <label>决策引擎</label>
+                <select name="decision_engine" id="f_decision_engine">
+                  <option value="llm">LLM（每次调用模型判断）</option>
+                  <option value="jiwen">积温 Jiwen（数学模型，省 token）</option>
+                </select>
+                <div class="hint">LLM 模式：每次检查都调用模型判断是否联系。积温模式：纯数学漂移计算，只在触发阈值时才调模型生成内容。</div>
+
+                <div class="section-title">Jiwen Parameters</div>
+                <div class="hint" style="margin-bottom:12px">积温引擎参数（仅在选择积温模式时生效）</div>
+                <div class="grid-2">
+                  <div>
+                    <label>连接增长速率</label>
+                    <input type="number" step="0.0001" min="0.0001" max="0.01" name="jiwen_connection_rate" id="f_jiwen_connection_rate">
+                    <div class="hint">越大=越快想找你（推荐0.0005~0.002）</div>
+                  </div>
+                  <div>
+                    <label>考虑联系阈值</label>
+                    <input type="number" step="0.05" min="0.1" max="0.9" name="jiwen_consider_contact" id="f_jiwen_consider_contact">
+                    <div class="hint">连接值达到此值时开始考虑找你</div>
+                  </div>
+                  <div>
+                    <label>强制联系阈值</label>
+                    <input type="number" step="0.05" min="0.2" max="1.0" name="jiwen_force_contact" id="f_jiwen_force_contact">
+                    <div class="hint">达到此值时不管骄傲直接找你</div>
+                  </div>
+                  <div>
+                    <label>骄傲阻挡阈值</label>
+                    <input type="number" step="0.05" min="0.1" max="0.9" name="jiwen_pride_block" id="f_jiwen_pride_block">
+                    <div class="hint">骄傲值高于此时忍住不找你</div>
+                  </div>
+                  <div>
+                    <label>连接加速指数</label>
+                    <input type="number" step="0.1" min="1.0" max="5.0" name="jiwen_connection_accel" id="f_jiwen_connection_accel">
+                    <div class="hint">越大=沉默越久增长越快</div>
+                  </div>
+                  <div>
+                    <label>加速延迟（分钟）</label>
+                    <input type="number" step="5" min="0" max="180" name="jiwen_accel_delay" id="f_jiwen_accel_delay">
+                    <div class="hint">多久后增长速率开始加速</div>
+                  </div>
+                </div>
+
+                <div class="section-title">Wake Settings</div>
+                <div class="grid-2">
+                  <div>
+                    <label>白天多久未回复后唤醒（分钟）</label>
+                    <input type="number" min="1" name="day_wake_after" id="f_day_wake_after">
+                  </div>
+                  <div>
+                    <label>夜间多久未回复后唤醒（分钟）</label>
+                    <input type="number" min="1" name="night_wake_after" id="f_night_wake_after">
+                  </div>
+                  <div>
+                    <label>白天检查间隔（分钟）</label>
+                    <input type="number" min="1" name="day_check_interval" id="f_day_check_interval">
+                  </div>
+                  <div>
+                    <label>夜间检查间隔（分钟）</label>
+                    <input type="number" min="1" name="night_check_interval" id="f_night_check_interval">
+                  </div>
+                  <div>
+                    <label>白天开始小时</label>
+                    <input type="number" min="0" max="23" name="wake_day_start_hour" id="f_wake_day_start_hour">
+                  </div>
+                  <div>
+                    <label>白天结束小时</label>
+                    <input type="number" min="1" max="24" name="wake_day_end_hour" id="f_wake_day_end_hour">
+                  </div>
+                </div>
+                <div class="hint" id="night-hint"></div>
+
+                <div class="section-title">Weather</div>
+                <label>天气注入</label>
+                <select name="weather_enabled" id="f_weather_enabled">
+                  <option value="false">关闭</option>
+                  <option value="true">开启</option>
+                </select>
+                <label>位置名称</label>
+                <input name="weather_location_name" id="f_weather_location_name" placeholder="例如：London">
+                <div class="grid-2">
+                  <div>
+                    <label>纬度 Latitude</label>
+                    <input name="weather_lat" id="f_weather_lat" placeholder="例如：51.5072">
+                  </div>
+                  <div>
+                    <label>经度 Longitude</label>
+                    <input name="weather_lon" id="f_weather_lon" placeholder="例如：-0.1276">
+                  </div>
+                </div>
+                <label>单位</label>
+                <select name="weather_units" id="f_weather_units">
+                  <option value="metric">摄氏度 / km/h</option>
+                  <option value="fahrenheit">华氏度 / mph</option>
+                </select>
+                <div class="hint">天气使用 Open-Meteo 免费接口，不需要 API Key；只有开启后才会按你填写的经纬度读取天气。</div>
+                <button type="submit" class="save">保存配置</button>
+              </form>
+            </div>
+
+            <button onclick="restartServices()" class="restart">一键重启网关 + 唤醒端</button>
+            <div class="note">只重启这两个，VPS 上其他服务（阅读器、菜市场等）不受影响</div>
+          </div>
+        </details>
+      </section>
+      <!-- ==================== 屏 2：克咪 ==================== -->
+      <section class="screen" id="s-kemi">
+        <div class="feed-head">
+          <span id="kemi-summary">加载中…</span>
+        </div>
+
+        <div class="card card-feed">
+          <h3>💌 推送记录</h3>
+          <div class="feed" id="push-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>🎮 游戏记录</h3>
+          <div class="feed" id="game-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>💬 论坛记录</h3>
+          <div class="feed" id="forum-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>🏄 上网冲浪</h3>
+          <div class="feed" id="web-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>📖 日记</h3>
+          <div id="diary-feed"><div class="ph">加载中…</div></div>
+        </div>
+      </section>
+
+      <!-- ==================== 屏 3：审核 ==================== -->
+      <section class="screen" id="s-audit">
+        <div class="feed-head">发言闸门与上游故障，平时不用看。</div>
+
+        <div class="card card-feed">
+          <h3>🚪 论坛闸门</h3>
+          <div class="hint" id="gate-summary">加载中…</div>
+          <div class="feed" id="gate-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>⚠️ 上游故障</h3>
+          <div class="hint">网关转发上游 500 的原始记录。空 = 没出过事。</div>
+          <div class="feed" id="fail-feed"><div class="ph">加载中…</div></div>
+        </div>
+      </section>
+
+      <!-- ==================== 屏 4：浏览器 ==================== -->
+      <section class="screen" id="s-browser">
+        <div class="feed-head">
+          <span id="browser-summary">浏览器代理审批面板</span>
+        </div>
+
+        <div class="card card-feed">
+          <h3>🤖 待审批操作</h3>
+          <div class="hint" id="approval-summary">加载中…</div>
+          <div class="feed" id="approval-feed"><div class="ph">加载中…</div></div>
+        </div>
+
+        <div class="card card-feed">
+          <h3>✅ 已处理记录</h3>
+          <div class="feed" id="history-feed"><div class="ph">暂无记录</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>
