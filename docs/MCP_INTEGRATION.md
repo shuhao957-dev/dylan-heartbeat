@@ -350,11 +350,30 @@ client.on('error', (err) => {
 
 ---
 
+## 注意：FastMCP (HTTP) 用不同的传输层
+
+如果你用的是 **FastMCP**（本地 HTTP 服务），不是上面的 stdio 方案，而是用 HTTP SSE 传输：
+
+```javascript
+// ❌ 错误：stdio 传输
+const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
+const transport = new StdioClientTransport({ command: 'python', args: ['server.py'] });
+
+// ✅ 正确：HTTP SSE 传输（FastMCP）
+const { SSEClientTransport } = require('@modelcontextprotocol/sdk/client/sse.js');
+const transport = new SSEClientTransport(new URL('http://localhost:8000/sse'));
+```
+
+**完整的 FastMCP 集成指南见 [FASTMCP_INTEGRATION.md](./FASTMCP_INTEGRATION.md)**
+
+---
+
 ## 总结
 
 - ✅ **原项目不用 MCP**，直接调 HTTP API
 - ✅ **如果想用 MCP**，按上面的桥接方案实现
 - ✅ **推荐方案**：简单 API 用 HTTP，复杂工具用 MCP
 - ✅ **关键代码**：`prepare()` 连接、`tools` 转换、`handleTool()` 调用
+- ✅ **FastMCP (HTTP) 传输**：用 SSEClientTransport，见 FASTMCP_INTEGRATION.md
 
 有问题随时问！
