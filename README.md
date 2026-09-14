@@ -4,6 +4,8 @@
 
 让 AI 伴侣在用户沉默时自主决策：是玩游戏、逛论坛、刷社交媒体，还是给用户发推送？适用于任何「移动端无法接收服务器推送」的场景。
 
+**📌 本项目基于 [@callie0313/dylan-heartbeat](https://github.com/callie0313/dylan-heartbeat) 开源化改编**
+
 ---
 
 ## 🎯 核心问题
@@ -406,6 +408,20 @@ captureDigest(wakeSession, {
 
 ---
 
+## 🙏 致谢
+
+本项目源自 [@callie0313](https://github.com/callie0313) 的原始实现：[callie0313/dylan-heartbeat](https://github.com/callie0313/dylan-heartbeat)
+
+在原项目的基础上，我们进行了以下改进和开源化工作：
+- 🔒 脱敏和泛化：移除私人配置，改为可配置参数
+- 📝 完善文档：添加完整的 API 文档和使用示例
+- 🎨 模块化：提取可复用的核心组件
+- 🌍 国际化：支持自定义 AI 和用户称呼
+
+感谢原作者的精彩设计和实现！
+
+---
+
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
@@ -415,3 +431,9 @@ captureDigest(wakeSession, {
 ## 📄 License
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
+
+---
+
+## 🔗 相关项目
+
+- [原始项目](https://github.com/callie0313/dylan-heartbeat) - 本项目的源头
