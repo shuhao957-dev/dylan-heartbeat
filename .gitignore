@@ -1,0 +1,22 @@
+node_modules/
+*.log
+.env
+.DS_Store
+
+# 数据文件（不上传实际数据）
+current_wake_session.json
+pending_*_digest.json
+enhanced_messages.json
+*_history.txt
+*_log.json
+combined_state.json
+
+# 备份文件
+*.bak
+*.bak_*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

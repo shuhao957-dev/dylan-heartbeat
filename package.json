@@ -1,0 +1,29 @@
+{
+  "name": "dylan-heartbeat",
+  "version": "1.0.0",
+  "description": "AI companion autonomous wakeup system with digest lifecycle management",
+  "main": "index.js",
+  "scripts": {
+    "test": "node core/wake_digest.js --selftest"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "companion",
+    "wakeup",
+    "digest",
+    "lifecycle",
+    "autonomous"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/dylan-heartbeat.git"
+  }
+}
