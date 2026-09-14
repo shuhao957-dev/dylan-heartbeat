@@ -1,10 +1,11 @@
 # Dylan Heartbeat
 
-> AI companion autonomous wakeup system with digest lifecycle management
+> **📢 本项目基于 [@callie0313/dylan-heartbeat](https://github.com/callie0313/dylan-heartbeat) 开源化改编**  
+> 增加了完整文档、跨平台支持、活动模板、管理面板，更易部署和二次开发
 
-让 AI 伴侣在用户沉默时自主决策：是玩游戏、逛论坛、刷社交媒体，还是给用户发推送？适用于任何「移动端无法接收服务器推送」的场景。
+AI 伴侣自动唤醒系统 + 摘要生命周期管理
 
-**📌 本项目基于 [@callie0313/dylan-heartbeat](https://github.com/callie0313/dylan-heartbeat) 开源化改编**
+让 AI 伴侣在用户沉默时自主决策：是玩游戏、逛论坛、刷社交媒体，还是给用户发推送？适用于任何「移动端无法接收服务器推送」的场景
 
 ---
 
@@ -60,21 +61,6 @@
 ---
 
 ## ✨ 核心设计：摘要生命周期管理
-
-### 旧方案的三个致命缺陷（已废弃）
-
-```javascript
-// ❌ 旧逻辑：从整条时间线捞全部特殊事件
-const specialEvents = timeline.filter(isSpecialEvent);
-llmMessages.push(...specialEvents);
-```
-
-**问题**：
-1. **无时间窗 + 无上限** → 时间线越长，注入的事件越多，无限膨胀
-2. **旧记录无时间戳** → 定位失败，全堆到队尾（排在用户最新消息之后） → 畸形对话（以 assistant 结尾），导致上游 500 错误
-3. **推送记录不进时间线** → 推送永远不被注入，记忆断链
-
-### 新方案：生命周期摘要
 
 **核心思想**：
 - 不是「一直注入所有后台活动」
