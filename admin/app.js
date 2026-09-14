@@ -654,7 +654,9 @@ async function toggleInject(key, enabled) {
 }
 
 // ===== 浏览器审批 =====
-const BROWSER_AGENT_URL = 'http://100.74.44.85:9223';
+// 浏览器代理地址（需要配置）
+// 如果你启用了浏览器代理功能，设置环境变量或在此填入地址
+const BROWSER_AGENT_URL = window.BROWSER_AGENT_URL || process.env.BROWSER_AGENT_URL || '';
 
 async function loadBrowserApprovals() {
   try {
